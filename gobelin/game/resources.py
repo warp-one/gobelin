@@ -14,11 +14,20 @@ def uncenter_image(image):
     image.anchor_y = 0
     return image
 	
-# images
+# IMAGES
+# backgrounds
 title = pyglet.resource.image("title.png")
+
+# static tiles
 dirt = pyglet.resource.image("dirt.png")
-cursor = pyglet.resource.image("cursor.png")
 block = pyglet.resource.image("block.png")
+
+# unit tiles
+cursor = pyglet.resource.image("cursor.png")
 magic_w = pyglet.resource.image("magic-w.png")
 
-# fonts
+# mover tiles
+default = pyglet.resource.image("default.png")
+box = pyglet.resource.image("box.png")
+
+# FONTS
