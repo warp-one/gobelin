@@ -119,4 +119,4 @@ class MapEditor(MapMover):
                                     self.map_r,
                                     resources.box)
                                     )
-            self.map.boxes[-1].batch = pyglet.graphics.Batch()
+            self.map.redraw_map()

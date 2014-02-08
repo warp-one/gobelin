@@ -82,6 +82,8 @@ class TestMap(object):
                         batch = self.batch,
                         group = self.level.background)
                         )
+        for unit in self.boxes:
+            unit.selector.batch = self.level.batch
 
     def place_objects(self):
         crates = [(1, 1),
