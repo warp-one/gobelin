@@ -17,6 +17,10 @@ class MobileUnit(cursor.MapMover):
             self.moments -= 1
         
 class GoblinUnit(MobileUnit):
+    def __init__(self, *args, **kwargs):
+        super(GoblinUnit, self).__init__(*args, **kwargs)
+        self.strong = False
+        
     def take_turn(self):
         victim = self.find_nearest_foe()
         while self.moments:
@@ -24,16 +28,16 @@ class GoblinUnit(MobileUnit):
         
     def find_nearest_foe(self):
         foes = []
-        range = 0
+        range = 10000
         target = None
         for unit in self.map.magic_team:
             distance = sqrt(
                         (self.map_c - unit.map_c) ** 2 +
                         (self.map_r - unit.map_r) ** 2
                         )
-            foes.append((unit, distance))
+            foes.append((unit, int(distance)))
         for pair in foes:
-            if pair[1] > range:
+            if pair[1] < range:
                 range = pair[1]
                 target = pair[0]
         return target

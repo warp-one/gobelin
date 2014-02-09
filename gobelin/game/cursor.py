@@ -10,6 +10,8 @@ class MapMover(object):
         self.map_r = map_r
         self.img = img
         
+        self.strong = True
+        
         self.selector = pyglet.sprite.Sprite(
                                   img = self.img,
                                   batch = None,
@@ -53,9 +55,12 @@ class MapMover(object):
             for unit in self.map.magic_team:
                 if (unit.map_r, unit.map_c) == (row, col):
                     not_blocked = False
+            for unit in self.map.goblin_team:
+                if (unit.map_r, unit.map_c) == (row, col):
+                    not_blocked = False
             for unit in self.map.boxes:
                 if (unit.map_r, unit.map_c) == (row, col):
-                    if unit.get_pushed(self.map_r, self.map_c):
+                    if unit.get_pushed(self.map_r, self.map_c, self):
                         not_blocked = True
                     else:
                         not_blocked = False
@@ -82,7 +87,7 @@ class PushableBox(MapMover):
                     not_blocked = False
             for unit in self.map.boxes:
                 if (unit.map_r, unit.map_c) == (row, col):
-                    if unit.get_pushed(self.map_r, self.map_c):
+                    if unit.get_pushed(self.map_r, self.map_c, self):
                         not_blocked = True
                     else:
                         not_blocked = False
@@ -91,17 +96,18 @@ class PushableBox(MapMover):
         return not_blocked
 
     # tries to get pushed from some direction and lets you know if it succeeds
-    def get_pushed(self, pusher_r, pusher_c):
+    def get_pushed(self, pusher_r, pusher_c, pusher):
         delta_c = self.map_c - pusher_c
         delta_r = self.map_r - pusher_r
-        if delta_c and self.is_legal_move(self.map_c + delta_c, self.map_r):
-            self.selector.x += self.step * (delta_c)
-            self.map_c += delta_c
-            return True
-        if delta_r and self.is_legal_move(self.map_c, self.map_r + delta_r):
-            self.selector.y += self.step * (delta_r)
-            self.map_r += delta_r
-            return True
+        if pusher.strong:
+            if delta_c and self.is_legal_move(self.map_c + delta_c, self.map_r):
+                self.selector.x += self.step * (delta_c)
+                self.map_c += delta_c
+                return True
+            if delta_r and self.is_legal_move(self.map_c, self.map_r + delta_r):
+                self.selector.y += self.step * (delta_r)
+                self.map_r += delta_r
+                return True
         return False
         
     def die(self):
@@ -152,3 +158,6 @@ class MapEditor(MapMover):
                                     resources.box)
                                     )
             self.map.redraw_map()
+        if symbol == key.Q:
+            for unit in self.map.magic_team:
+                unit.moments += 7

@@ -24,6 +24,12 @@ class LevelAdministrator(screen.Screen):
             self.enemy_turn()
             for unit in self.current_map.magic_team:
                 unit.moments = 7
+        if symbol == key.F1:
+            self.game.window.pop_handlers()
+            self.game.window.push_handlers(self.current_map.map_editor[0])
+        if symbol == key.F2:
+            self.game.window.pop_handlers()
+            self.game.window.push_handlers(self.current_map.magic_team[0])
         self.current_map.update_map()
             
     def start(self):
@@ -40,7 +46,7 @@ class LevelAdministrator(screen.Screen):
         self.test_mover_2.selector.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_2)
         
-        self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10)
+        self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10, resources.goblin)
         self.test_enemy_1.selector.batch = self.batch
         self.current_map.goblin_team.append(self.test_enemy_1)
         
@@ -50,7 +56,7 @@ class LevelAdministrator(screen.Screen):
         
         self.map_editor = cursor.MapEditor(self.current_map, 1, 4, resources.cursor)
         self.map_editor.selector.batch = self.batch
-        self.current_map.magic_team.append(self.map_editor)
+        self.current_map.map_editor.append(self.map_editor)
 
         self.selected_unit = 0
         

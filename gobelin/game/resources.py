@@ -26,6 +26,7 @@ water = pyglet.resource.image("water.png")
 # unit tiles
 cursor = pyglet.resource.image("cursor.png")
 magic_w = pyglet.resource.image("magic-w.png")
+goblin = pyglet.resource.image("goblin.png")
 
 # mover tiles
 default = pyglet.resource.image("default.png")

@@ -38,6 +38,7 @@ class TestMap(object):
         self.party_size = 3
         self.magic_team = []
         self.goblin_team = []
+        self.map_editor = []
         self.boxes = []
 
     def move_map(self, add_x, add_y):
