@@ -1,5 +1,3 @@
-
-
 import pyglet
 from pyglet.window import key
 
@@ -111,6 +109,10 @@ class PushableBox(MapMover):
         self.map.boxes.remove(self)
         
 class MapEditor(MapMover):
+    def __init__(self, *args, **kwargs):
+        super(MapEditor, self).__init__(*args, **kwargs)
+        self.moments = 0
+        
     def on_key_press(self, symbol, modifiers):
         if symbol == key.UP:
             self.selector.y += self.step

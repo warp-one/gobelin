@@ -37,6 +37,7 @@ class TestMap(object):
         # units
         self.party_size = 3
         self.magic_team = []
+        self.goblin_team = []
         self.boxes = []
 
     def move_map(self, add_x, add_y):

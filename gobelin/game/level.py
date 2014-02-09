@@ -1,7 +1,7 @@
 from pyglet.window import key
 import pyglet
 
-import screen, test_map, cursor, resources
+import screen, test_map, cursor, resources, mob
 
 class LevelAdministrator(screen.Screen):
     def __init__(self, game):
@@ -18,6 +18,12 @@ class LevelAdministrator(screen.Screen):
                 self.selected_unit = 0
             self.game.window.pop_handlers()
             self.game.window.push_handlers(self.current_map.magic_team[self.selected_unit].on_key_press)
+        if symbol == key.ENTER:
+            for unit in self.current_map.goblin_team:
+                unit.moments = 7
+            self.enemy_turn()
+            for unit in self.current_map.magic_team:
+                unit.moments = 7
         self.current_map.update_map()
             
     def start(self):
@@ -25,14 +31,18 @@ class LevelAdministrator(screen.Screen):
         self.current_map = test_map.TestMap(self, self.batch)
         self.current_map.redraw_map()
 
-        self.test_mover_1 = cursor.MapMover(self.current_map)
+        self.test_mover_1 = mob.MobileUnit(self.current_map)
         self.test_mover_1.selector.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_1)
         self.game.window.push_handlers(self.test_mover_1.on_key_press)
 
-        self.test_mover_2 = cursor.MapMover(self.current_map, 5, 5, resources.magic_w)
+        self.test_mover_2 = mob.MobileUnit(self.current_map, 5, 5, resources.magic_w)
         self.test_mover_2.selector.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_2)
+        
+        self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10)
+        self.test_enemy_1.selector.batch = self.batch
+        self.current_map.goblin_team.append(self.test_enemy_1)
         
         self.current_map.place_objects()
         for b in self.current_map.boxes:
@@ -43,6 +53,10 @@ class LevelAdministrator(screen.Screen):
         self.current_map.magic_team.append(self.map_editor)
 
         self.selected_unit = 0
+        
+    def enemy_turn(self):
+        for unit in self.current_map.goblin_team:
+            unit.take_turn()
 
     def on_draw(self):
         self.game.window.clear()
