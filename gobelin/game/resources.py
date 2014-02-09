@@ -21,6 +21,7 @@ title = pyglet.resource.image("title.png")
 # static tiles
 dirt = pyglet.resource.image("dirt.png")
 block = pyglet.resource.image("block.png")
+water = pyglet.resource.image("water.png")
 
 # unit tiles
 cursor = pyglet.resource.image("cursor.png")

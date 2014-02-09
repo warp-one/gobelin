@@ -72,6 +72,26 @@ class PushableBox(MapMover):
     def on_key_press(self):
         pass
 
+    def is_not_blocked(self, col, row):
+        not_blocked = False
+        try:
+            if not self.map.foot_map[row][col]:
+                not_blocked = True
+            elif self.map.foot_map[row][col] == 2:
+                not_blocked = True
+            for unit in self.map.magic_team:
+                if (unit.map_r, unit.map_c) == (row, col):
+                    not_blocked = False
+            for unit in self.map.boxes:
+                if (unit.map_r, unit.map_c) == (row, col):
+                    if unit.get_pushed(self.map_r, self.map_c):
+                        not_blocked = True
+                    else:
+                        not_blocked = False
+        except IndexError:
+            print "Stop trying to walk off the edge!"
+        return not_blocked
+
     # tries to get pushed from some direction and lets you know if it succeeds
     def get_pushed(self, pusher_r, pusher_c):
         delta_c = self.map_c - pusher_c
@@ -85,6 +105,10 @@ class PushableBox(MapMover):
             self.map_r += delta_r
             return True
         return False
+        
+    def die(self):
+        self.selector.batch = None
+        self.map.boxes.remove(self)
         
 class MapEditor(MapMover):
     def on_key_press(self, symbol, modifiers):
@@ -107,11 +131,17 @@ class MapEditor(MapMover):
                 changed_tile = 1
             self.map.foot_map[self.map_r][self.map_c] = changed_tile    
             self.map.redraw_map()
+        if symbol == key.A:
+            if self.map.foot_map[self.map_r][self.map_c] == 2:
+                changed_tile = 0
+            else:
+                changed_tile = 2
+            self.map.foot_map[self.map_r][self.map_c] = changed_tile    
+            self.map.redraw_map()
         if symbol == key.X:
             for unit in self.map.boxes:
                 if (self.map_r, self.map_c) == (unit.map_r, unit.map_c):
-                    unit.selector.batch = None
-                    self.map.boxes.remove(unit)
+                    unit.die()
                     return
             self.map.boxes.append(PushableBox(
                                     self.map,

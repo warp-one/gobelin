@@ -18,6 +18,7 @@ class LevelAdministrator(screen.Screen):
                 self.selected_unit = 0
             self.game.window.pop_handlers()
             self.game.window.push_handlers(self.current_map.magic_team[self.selected_unit].on_key_press)
+        self.current_map.update_map()
             
     def start(self):
         self.batch = pyglet.graphics.Batch()

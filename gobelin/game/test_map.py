@@ -13,8 +13,8 @@ class TestMap(object):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2],
+            [0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -23,22 +23,6 @@ class TestMap(object):
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             ]
-        self.object_map = [
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 1, 0, 2, 0, 3, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 5, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 6, 0, 7, 0, 8, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 9, 0,10, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0,11, 0,12, 0,13, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            ]            
         self.x = 300
         self.y = 300
 
@@ -48,6 +32,7 @@ class TestMap(object):
         # textures
         self.dirt = resources.dirt
         self.wall = resources.block
+        self.water = resources.water
         
         # units
         self.party_size = 3
@@ -82,6 +67,14 @@ class TestMap(object):
                         batch = self.batch,
                         group = self.level.background)
                         )
+                if tile_identity == 2:
+                    r.append(pyglet.sprite.Sprite(
+                        img = self.water,
+                        x = c * self.water.width + self.x,
+                        y = (self.board.index(r) + 1) * self.water.height + self.y,
+                        batch = self.batch,
+                        group = self.level.background)
+                        )
         for unit in self.boxes:
             unit.selector.batch = self.level.batch
 
@@ -95,3 +88,10 @@ class TestMap(object):
                             b[1],
                             resources.box)
                             )
+
+    def update_map(self):
+        for b in self.boxes:
+            if self.foot_map[b.map_r][b.map_c] == 2:
+                b.die()
+                self.foot_map[b.map_r][b.map_c] = 0
+        self.redraw_map()
