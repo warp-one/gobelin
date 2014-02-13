@@ -28,7 +28,7 @@ class GoblinUnit(MobileUnit):
         
     def find_nearest_foe(self):
         foes = []
-        range = 10000
+        enemy_range = 10000
         target = None
         for unit in self.map.magic_team:
             distance = sqrt(
@@ -37,7 +37,7 @@ class GoblinUnit(MobileUnit):
                         )
             foes.append((unit, int(distance)))
         for pair in foes:
-            if pair[1] < range:
+            if pair[1] < enemy_range:
                 range = pair[1]
                 target = pair[0]
         return target
