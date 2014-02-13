@@ -85,6 +85,9 @@ class PushableBox(MapMover):
             for unit in self.map.magic_team:
                 if (unit.map_r, unit.map_c) == (row, col):
                     not_blocked = False
+            for unit in self.map.goblin_team:
+                if (unit.map_r, unit.map_c) == (row, col):
+                    not_blocked = False
             for unit in self.map.boxes:
                 if (unit.map_r, unit.map_c) == (row, col):
                     if unit.get_pushed(self.map_r, self.map_c, self):

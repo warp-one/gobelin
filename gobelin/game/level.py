@@ -37,7 +37,7 @@ class LevelAdministrator(screen.Screen):
         self.current_map = test_map.TestMap(self, self.batch)
         self.current_map.redraw_map()
 
-        self.test_mover_1 = mob.MobileUnit(self.current_map)
+        self.test_mover_1 = mob.MobileUnit(self.current_map, 2, 8)
         self.test_mover_1.selector.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_1)
         self.game.window.push_handlers(self.test_mover_1.on_key_press)

@@ -1,6 +1,6 @@
 import pyglet
 
-import resources, cursor
+import resources, cursor, map
 
 class TestMap(object):
     def __init__(self, level, batch):
@@ -33,6 +33,7 @@ class TestMap(object):
         self.dirt = resources.dirt
         self.wall = resources.block
         self.water = resources.water
+        self.step = self.dirt.width
         
         # units
         self.party_size = 3
@@ -40,6 +41,8 @@ class TestMap(object):
         self.goblin_team = []
         self.map_editor = []
         self.boxes = []
+        
+        self.sight_range = 5
 
     def move_map(self, add_x, add_y):
         self.x += add_x
@@ -47,38 +50,57 @@ class TestMap(object):
 
     def redraw_map(self):
         self.board = []
+        row = 0
+        try:
+            light_sources = self.magic_team
+        except IndexError:
+            light_source = None
+            print "index error"
         for r in range(self.map_height):
             self.board.append([])
         for r in self.board:
-            row = self.board.index(r)
             for c in range(self.map_width):
                 tile_identity = self.foot_map[row][c]
-                if tile_identity == 0:
-                    r.append(pyglet.sprite.Sprite(
-                        img = self.dirt,
-                        x = c * self.dirt.width + self.x,
-                        y = (self.board.index(r) + 1) * self.dirt.height + self.y,
-                        batch = self.batch,
-                        group = self.level.background)
-                        )
-                if tile_identity == 1:
-                    r.append(pyglet.sprite.Sprite(
-                        img = self.wall,
-                        x = c * self.wall.width + self.x,
-                        y = (self.board.index(r) + 1) * self.wall.height + self.y,
-                        batch = self.batch,
-                        group = self.level.background)
-                        )
-                if tile_identity == 2:
-                    r.append(pyglet.sprite.Sprite(
-                        img = self.water,
-                        x = c * self.water.width + self.x,
-                        y = (self.board.index(r) + 1) * self.water.height + self.y,
-                        batch = self.batch,
-                        group = self.level.background)
-                        )
+                x_pos = c * self.step + self.x
+                y_pos = (row + 1) * self.step + self.y
+                tile_batch = self.batch
+                tile_group = self.level.background
+                if map.distance((row, c), light_sources) < self.sight_range:
+                    if tile_identity == 0:
+                        r.append(pyglet.sprite.Sprite(
+                            img = self.dirt,
+                            x = x_pos,
+                            y = y_pos,
+                            batch = tile_batch,
+                            group = tile_group)
+                            )
+                    elif tile_identity == 1:
+                        r.append(pyglet.sprite.Sprite(
+                            img = self.wall,
+                            x = x_pos,
+                            y = y_pos,
+                            batch = tile_batch,
+                            group = tile_group)
+                            )
+                    elif tile_identity == 2:
+                        r.append(pyglet.sprite.Sprite(
+                            img = self.water,
+                            x = x_pos,
+                            y = y_pos,
+                            batch = tile_batch,
+                            group = tile_group)
+                            )
+            row += 1
         for unit in self.boxes:
-            unit.selector.batch = self.level.batch
+            if map.distance((unit.map_r, unit.map_c), light_sources) < self.sight_range:
+                unit.selector.batch = self.level.batch
+            else:
+                unit.selector.batch = None
+        for unit in self.goblin_team:
+            if map.distance((unit.map_r, unit.map_c), light_sources) < self.sight_range:
+                unit.selector.batch = self.level.batch
+            else:
+                unit.selector.batch = None
 
     def place_objects(self):
         crates = [(1, 1),

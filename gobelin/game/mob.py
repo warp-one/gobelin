@@ -12,7 +12,7 @@ class MobileUnit(cursor.MapMover):
         self.moments = 7
         
     def on_key_press(self, symbol, modifiers):
-        if self.moments:
+        if True:
             super(MobileUnit, self).on_key_press(symbol, modifiers)
             self.moments -= 1
         
