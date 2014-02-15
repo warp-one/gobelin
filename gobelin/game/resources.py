@@ -32,4 +32,9 @@ goblin = pyglet.resource.image("goblin.png")
 default = pyglet.resource.image("default.png")
 box = pyglet.resource.image("box.png")
 
+# cursor tiles
+target = pyglet.resource.image("target.png")
+select = pyglet.resource.image("select.png")
+rslect = pyglet.resource.image("rslect.png")
+
 # FONTS

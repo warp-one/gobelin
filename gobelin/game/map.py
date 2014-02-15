@@ -1,6 +1,6 @@
 from math import sqrt
 
-def distance(coordinate, units):
+def closest_distance(coordinate, units):
     lowest_distance = 1000
     if units:
         for unit in units:
@@ -13,3 +13,10 @@ def distance(coordinate, units):
         return lowest_distance
     else:
         return 0
+        
+def target_cross(unit):
+    cross =  [(unit.map_r + 1, unit.map_c),
+              (unit.map_r - 1, unit.map_c),
+              (unit.map_r, unit.map_c + 1),
+              (unit.map_r, unit.map_c - 1)]
+    return [x for x in cross if unit.is_on_board(x[0], x[1])]
