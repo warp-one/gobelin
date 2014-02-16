@@ -1,4 +1,5 @@
 from math import sqrt
+from random import choice, randint
 
 import pyglet
 from pyglet.window import key
@@ -11,8 +12,7 @@ class MobileUnit(cursor.MapMover):
         
         self.speed = 75
         self.moments = self.speed
-        self.l_leg = 1.0
-        self.r_leg = 1.0
+        self.body = 100
         self.wx = 0
         self.wy = 0
         self.stat_card = []
@@ -21,36 +21,52 @@ class MobileUnit(cursor.MapMover):
         if self.moments > 0:
             if super(MobileUnit, self).on_key_press(symbol, modifiers):
                 self.moments -= 15
+                return True
+            else:
+                return False
             
     def display_stats(self):
         self.stats = [self.moments]
+        self.stats.append(self.body)
         self.stat_card = []
+        a_number = 0
         for stat in self.stats:
             self.stat_card.append(stat_card.StatLabel(
                                     "{0}".format(stat),
                                     x = self.wx,
-                                    y = self.wy,
+                                    y = self.wy - a_number * 20,
                                     batch = self.map.level.batch
                                     ))
             self.stat_card[-1].unit = self
+            a_number += 1
                                     
     def clear_stats(self):
         for stat in self.stat_card:
-            stat.die()
+            self.stat_card.remove(stat)
             stat.delete()
+            stat.die()
         self.stat_card = []
         self.stats = []
+        
+    def die(self):
+        print "WE DIED!"
         
 class GoblinUnit(MobileUnit):
     def __init__(self, *args, **kwargs):
         super(GoblinUnit, self).__init__(*args, **kwargs)
         self.strong = False
         self.speed = 30
+        self.moments = self.speed
         
     def take_turn(self):
         victim = self.find_nearest_foe()
         while self.moments > 0:
+            for coordinate in map.target_cross(self):
+                if (coordinate[0], coordinate[1]) == (victim.map_c, victim.map_r):
+                    self.attack(victim)
+                    print "got 'im, boss"
             self.move_toward_foe(victim)
+            
         
     def find_nearest_foe(self):
         foes = []
@@ -88,6 +104,13 @@ class GoblinUnit(MobileUnit):
                 
     def lose_time(self, duration):
         self.moments -= duration
+        
+    def attack(self, target):
+        target.body -= 13 + randint(1,3)
+        if target.body <= 0.0:
+            target.die()
+        self.moments -= 20
+        
                 
 class MagicWoman(MobileUnit):
     def __init__(self, *args, **kwargs):
@@ -118,4 +141,13 @@ class MagicWoman(MobileUnit):
 
     def cast_spell(self):
         self.targets = []
-        self.ready = False 
+        self.ready = False
+        
+class MyHim(MobileUnit):
+    def __init__(self, *args, **kwargs):
+        super(MyHim, self).__init__(*args, **kwargs)
+        self.strong = True
+        self.speed = 75
+        
+    def on_key_press(self, symbol, modifiers):
+        super(MyHim, self).on_key_press(symbol, modifiers)

@@ -21,10 +21,11 @@ class Selector(pyglet.sprite.Sprite):
             self.selected_unit = self.units[unit_index]
             while not self.selected_unit.selector.batch:
                 unit_index += 1
+                if unit_index == len(self.units):
+                    unit_index = 0
                 self.selected_unit = self.units[unit_index]
         else:
             self.selected_unit = None
-
         self.update()
         
     def update(self):

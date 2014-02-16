@@ -31,9 +31,9 @@ class LevelAdministrator(screen.Screen):
                 self.selected_enemy = 0
             self.foe_selector.select(self.selected_enemy)
         if symbol == key.ENTER:
+            self.enemy_turn()
             for unit in self.current_map.goblin_team:
                 unit.moments = unit.speed
-            self.enemy_turn()
             for unit in self.current_map.magic_team:
                 unit.moments = unit.speed
         if symbol == key.F1:
@@ -56,14 +56,13 @@ class LevelAdministrator(screen.Screen):
         self.current_map.place_objects()
         for b in self.current_map.boxes:
             b.selector.batch = self.batch
-        
         self.spawn_map_editor()
         self.create_cursors()
         
         self.current_map.redraw()
 
     def spawn_magic_team(self):
-        self.test_mover_1 = mob.MobileUnit(self.current_map, 2, 8, group = self.foreground)
+        self.test_mover_1 = mob.MyHim(self.current_map, 2, 8, group = self.foreground)
         self.test_mover_1.selector.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_1)
         self.game.window.push_handlers(self.test_mover_1.on_key_press)
@@ -85,7 +84,7 @@ class LevelAdministrator(screen.Screen):
         self.current_map.goblin_team.append(self.test_enemy_2)
         
         for unit in self.current_map.goblin_team:
-            unit.wx, unit.wy = 700, 400
+            unit.wx, unit.wy = 700, 300
 
     def enemy_turn(self):
         for unit in self.current_map.goblin_team:

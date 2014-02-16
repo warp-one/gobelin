@@ -7,4 +7,3 @@ class StatLabel(pyglet.text.Label):
         
     def die(self):
         self.batch = None
-        self.unit.stat_card.remove(self)
