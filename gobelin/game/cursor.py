@@ -15,34 +15,42 @@ class Selector(pyglet.sprite.Sprite):
             self.selected_unit.clear_stats()
         self.visible_units = 0
         for unit in self.units:
-            if unit.selector.batch:
+            if unit.selector.visible:
                 self.visible_units += 1
         if self.visible_units:
             self.selected_unit = self.units[unit_index]
-            while not self.selected_unit.selector.batch:
+            while not self.selected_unit.selector.visible:
                 unit_index += 1
                 if unit_index == len(self.units):
                     unit_index = 0
                 self.selected_unit = self.units[unit_index]
+                self.selected_unit.display_stats()
+            self.visible = True
         else:
             self.selected_unit = None
         self.update()
         
     def update(self):
-        if self.selected_unit:
-            self.x = self.selected_unit.selector.x
-            self.y = self.selected_unit.selector.y
-            self.selected_unit.clear_stats()
-            self.selected_unit.display_stats()
-            return True
+        if self.visible:
+            if self.selected_unit:
+                self.x = self.selected_unit.selector.x
+                self.y = self.selected_unit.selector.y
+                self.map_x = self.selected_unit.map_x
+                self.map_y = self.selected_unit.map_y
+                self.selected_unit.update_stats()
+                return True
+            else:
+                self.visible = False
+                return False
         else:
-            return False
-
+            self.selected_unit = None
+            self.visible = False
+            
 class MapMover(object):
-    def __init__(self, map, map_c=0, map_r=0, img=resources.default, group=None):
+    def __init__(self, map, map_x=0, map_y=0, img=resources.default, group=None):
         self.map = map
-        self.map_c = map_c
-        self.map_r = map_r
+        self.map_x = map_x
+        self.map_y = map_y
         self.img = img
         self.group = group
         
@@ -51,61 +59,73 @@ class MapMover(object):
         self.selector = pyglet.sprite.Sprite(
                                   img = self.img,
                                   batch = None,
-                                  x = self.map.x + 10*self.map_c,
-                                  y = self.map.y + 10*(self.map_r+1),
+                                  x = self.map.x + 10*self.map_x,
+                                  y = self.map.y + 10*(self.map_y+1),
                                   group = self.group
                                   )
+        self.fog = pyglet.sprite.Sprite(
+                                  img = resources.shadow,
+                                  batch = None,
+                                  x = self.map.x + 10*self.map_x,
+                                  y = self.map.y + 10*(self.map_y+1),
+                                  group = self.group
+                                  )
+        self.dark = pyglet.sprite.Sprite(img=resources.dark)
+        self.images = [self.selector, self.fog, self.dark]
+
         self.step = self.selector.width
 
     def on_key_press(self, symbol, modifiers):
         if symbol == key.UP:
-            if self.is_legal_move(self.map_c, self.map_r + 1):
-                self.selector.y += self.step
-                self.map_r += 1
+            if self.is_legal_move(self.map_x, self.map_y + 1):
+                for s in self.images:
+                    s.y += self.step
+                self.map_y += 1
                 return True
         if symbol == key.DOWN:
-            if self.is_legal_move(self.map_c, self.map_r - 1):
-                self.selector.y -= self.step
-                self.map_r -= 1
+            if self.is_legal_move(self.map_x, self.map_y - 1):
+                for s in self.images:
+                    s.y -= self.step
+                self.map_y -= 1
                 return True
         if symbol == key.RIGHT:
-            if self.is_legal_move(self.map_c + 1, self.map_r):
-                self.selector.x += self.step
-                self.map_c += 1
+            if self.is_legal_move(self.map_x + 1, self.map_y):
+                for s in self.images:
+                    s.x += self.step
+                self.map_x += 1
                 return True
         if symbol == key.LEFT:
-            if self.is_legal_move(self.map_c - 1, self.map_r):
-                self.selector.x -= self.step
-                self.map_c -= 1
+            if self.is_legal_move(self.map_x - 1, self.map_y):
+                for s in self.images:
+                    s.x -= self.step
+                self.map_x -= 1
                 return True
         return False
 
     def is_on_board(self, col, row):
-        is_on_row, is_on_col = False, False
-        if row <= self.map.map_height - 1 and row >= 0:
-            is_on_row = True
-        if col <= self.map.map_width - 1 and col >= 0:
-            is_on_col = True
-
-        return is_on_row & is_on_col
+        if (col, row) in self.map.all_tile_cds:
+            return True
+        else:
+            return False
         
     def is_not_blocked(self, col, row):
+        current_plot = self.map.all_tile_cds[(col, row)]
         pathable = False
         unoccupied = True
         try:
-            if self.map.foot_map[row][col] == 0:
+            if current_plot.pathable:
                 pathable = True
             if self._blocked_special(col, row):
                 pathable = True
             for unit in self.map.magic_team:
-                if (unit.map_r, unit.map_c) == (row, col):
+                if (unit.map_y, unit.map_x) == (row, col):
                     unoccupied = False
             for unit in self.map.goblin_team:
-                if (unit.map_r, unit.map_c) == (row, col):
+                if (unit.map_y, unit.map_x) == (row, col):
                     unoccupied = False
             for unit in self.map.boxes:
-                if (unit.map_r, unit.map_c) == (row, col):
-                    if unit.get_pushed(self.map_r, self.map_c, self):
+                if (unit.map_y, unit.map_x) == (row, col):
+                    if unit.get_pushed(self.map_y, self.map_x, self):
                         unoccupied = True
                     else:
                         unoccupied = False
@@ -124,21 +144,21 @@ class PushableBox(MapMover):
         pass
         
     def _blocked_special(self, col, row):
-        if self.map.foot_map[row][col] == 2:
+        if self.map.all_tile_cds[(col, row)].boxable:
             return True
 
     # tries to get pushed from some direction and lets you know if it succeeds
     def get_pushed(self, pusher_r, pusher_c, pusher):
-        delta_c = self.map_c - pusher_c
-        delta_r = self.map_r - pusher_r
+        delta_c = self.map_x - pusher_c
+        delta_r = self.map_y - pusher_r
         if pusher.strong:
-            if delta_c and self.is_legal_move(self.map_c + delta_c, self.map_r):
+            if delta_c and self.is_legal_move(self.map_x + delta_c, self.map_y):
                 self.selector.x += self.step * (delta_c)
-                self.map_c += delta_c
+                self.map_x += delta_c
                 return True
-            if delta_r and self.is_legal_move(self.map_c, self.map_r + delta_r):
+            if delta_r and self.is_legal_move(self.map_x, self.map_y + delta_r):
                 self.selector.y += self.step * (delta_r)
-                self.map_r += delta_r
+                self.map_y += delta_r
                 return True
         return False
         
@@ -153,27 +173,26 @@ class MapEditor(MapMover):
         
     def on_key_press(self, symbol, modifiers):
         super(MapEditor, self).on_key_press(symbol, modifiers)
+        current_plot = self.map.all_tile_cds[(self.map_x, self.map_y)]
         if symbol == key.Z:
-            if self.map.foot_map[self.map_r][self.map_c] == 1:
-                changed_tile = 0
+            if current_plot.identity == 'dirt':
+                current_plot.become('wall')
             else:
-                changed_tile = 1
-            self.map.foot_map[self.map_r][self.map_c] = changed_tile    
+                current_plot.become('dirt')
         if symbol == key.A:
-            if self.map.foot_map[self.map_r][self.map_c] == 2:
-                changed_tile = 0
+            if current_plot.identity == 'water':
+                current_plot.become('dirt')
             else:
-                changed_tile = 2
-            self.map.foot_map[self.map_r][self.map_c] = changed_tile    
+                current_plot.become('water')
         if symbol == key.X:
             for unit in self.map.boxes:
-                if (self.map_r, self.map_c) == (unit.map_r, unit.map_c):
+                if (self.map_y, self.map_x) == (unit.map_y, unit.map_x):
                     unit.die()
                     return
             self.map.boxes.append(PushableBox(
                                     self.map,
-                                    self.map_c,
-                                    self.map_r,
+                                    self.map_x,
+                                    self.map_y,
                                     resources.box)
                                     )
         if symbol == key.Q:

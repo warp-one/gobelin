@@ -64,27 +64,35 @@ class LevelAdministrator(screen.Screen):
     def spawn_magic_team(self):
         self.test_mover_1 = mob.MyHim(self.current_map, 2, 8, group = self.foreground)
         self.test_mover_1.selector.batch = self.batch
+        self.test_mover_1.fog.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_1)
         self.game.window.push_handlers(self.test_mover_1.on_key_press)
 
         self.test_mover_2 = mob.MagicWoman(self.current_map, 5, 5, resources.magic_w, self.foreground)
         self.test_mover_2.selector.batch = self.batch
+        self.test_mover_2.fog.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_2)
         
         for unit in self.current_map.magic_team:
             unit.wx, unit.wy = 700, 500
+            unit.display_stats()
+            self.current_map.light_sources.append(unit)
+            unit.fog.visible = False
             
     def spawn_goblin_team(self):
         self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10, resources.goblin, self.foreground)
         self.test_enemy_1.selector.batch = self.batch
+        self.test_enemy_1.fog.batch = self.batch
         self.current_map.goblin_team.append(self.test_enemy_1)
         
         self.test_enemy_2 = mob.GoblinUnit(self.current_map, 6, 1, resources.goblin, self.foreground)
         self.test_enemy_2.selector.batch = self.batch
+        self.test_enemy_2.fog.batch = self.batch
         self.current_map.goblin_team.append(self.test_enemy_2)
         
         for unit in self.current_map.goblin_team:
             unit.wx, unit.wy = 700, 300
+            unit.display_stats()
 
     def enemy_turn(self):
         for unit in self.current_map.goblin_team:

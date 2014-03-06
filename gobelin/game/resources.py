@@ -21,12 +21,19 @@ title = pyglet.resource.image("title.png")
 # static tiles
 dirt = pyglet.resource.image("dirt.png")
 block = pyglet.resource.image("block.png")
+brick = pyglet.resource.image("brick.png")
+brk_t = pyglet.resource.image("brk-tp.png")
+brk_c = pyglet.resource.image("brk-cp.png")
+pillar = pyglet.resource.image("pillar.png")
 water = pyglet.resource.image("water.png")
+mist = pyglet.resource.image("mist.png")
+dark = pyglet.resource.image("dark.png")
 
 # unit tiles
 cursor = pyglet.resource.image("cursor.png")
 magic_w = pyglet.resource.image("magic-w.png")
 goblin = pyglet.resource.image("goblin.png")
+shadow = pyglet.resource.image("shadow.png")
 
 # mover tiles
 default = pyglet.resource.image("default.png")

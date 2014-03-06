@@ -21,6 +21,8 @@ class MobileUnit(cursor.MapMover):
         if self.moments > 0:
             if super(MobileUnit, self).on_key_press(symbol, modifiers):
                 self.moments -= 15
+                if self.stats:
+                    self.stats[0] -= 15
                 return True
             else:
                 return False
@@ -39,7 +41,13 @@ class MobileUnit(cursor.MapMover):
                                     ))
             self.stat_card[-1].unit = self
             a_number += 1
-                                    
+
+    def update_stats(self):
+        current_stat = 0
+        for stat in self.stat_card:
+            stat.text = "{0}".format(self.stats[current_stat])
+            current_stat += 1
+            
     def clear_stats(self):
         for stat in self.stat_card:
             self.stat_card.remove(stat)
@@ -49,7 +57,7 @@ class MobileUnit(cursor.MapMover):
         self.stats = []
         
     def die(self):
-        print "WE DIED!"
+        pass
         
 class GoblinUnit(MobileUnit):
     def __init__(self, *args, **kwargs):
@@ -62,7 +70,7 @@ class GoblinUnit(MobileUnit):
         victim = self.find_nearest_foe()
         while self.moments > 0:
             for coordinate in map.target_cross(self):
-                if (coordinate[0], coordinate[1]) == (victim.map_c, victim.map_r):
+                if (coordinate[0], coordinate[1]) == (victim.map_x, victim.map_y):
                     self.attack(victim)
                     print "got 'im, boss"
             self.move_toward_foe(victim)
@@ -74,8 +82,8 @@ class GoblinUnit(MobileUnit):
         target = None
         for unit in self.map.magic_team:
             distance = sqrt(
-                        (self.map_c - unit.map_c) ** 2 +
-                        (self.map_r - unit.map_r) ** 2
+                        (self.map_x - unit.map_x) ** 2 +
+                        (self.map_y - unit.map_y) ** 2
                         )
             foes.append((unit, int(distance)))
         for pair in foes:
@@ -85,8 +93,8 @@ class GoblinUnit(MobileUnit):
         return target
         
     def move_toward_foe(self, target):
-        c_diff = self.map_c - target.map_c
-        r_diff = self.map_r - target.map_r
+        c_diff = self.map_x - target.map_x
+        r_diff = self.map_y - target.map_y
         if abs(c_diff) >= abs(r_diff):
             if c_diff > 0:
                 if not self.on_key_press(key.LEFT, None):
@@ -117,7 +125,7 @@ class MagicWoman(MobileUnit):
         super(MagicWoman, self).__init__(*args, **kwargs)
         self.strong = False
         self.ready = False
-        self.speed = 100
+        self.speed = 100000
         
     def on_key_press(self, symbol, modifiers):
         if not self.ready:
@@ -132,11 +140,11 @@ class MagicWoman(MobileUnit):
         self.targets = [] 
         for coordinate in map.target_cross(self):
             self.targets.append((coordinate, pyglet.sprite.Sprite(
-                                          img = resources.target,
-                                          x = coordinate[1] * self.map.step + self.map.x,
-                                          y = (coordinate[0] + 1) * self.map.step + self.map.y,
-                                          batch = self.map.batch
-                                          )))
+                       img = resources.target,
+                       x = coordinate[1] * self.map.step + self.map.x,
+                       y = (coordinate[0] + 1) * self.map.step + self.map.y,
+                       batch = self.map.batch
+                       ) ))
         self.ready = True
 
     def cast_spell(self):
@@ -147,7 +155,7 @@ class MyHim(MobileUnit):
     def __init__(self, *args, **kwargs):
         super(MyHim, self).__init__(*args, **kwargs)
         self.strong = True
-        self.speed = 75
+        self.speed = 75000
         
     def on_key_press(self, symbol, modifiers):
         super(MyHim, self).on_key_press(symbol, modifiers)

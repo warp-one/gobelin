@@ -6,4 +6,5 @@ class StatLabel(pyglet.text.Label):
         self.unit = None
         
     def die(self):
-        self.batch = None
+        self.batch = None 
+        
