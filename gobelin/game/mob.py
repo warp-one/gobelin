@@ -29,7 +29,6 @@ class MobileUnit(cursor.MapMover):
             
     def display_stats(self):
         self.stats = [self.moments]
-        self.stats.append(self.body)
         self.stat_card = []
         a_number = 0
         for stat in self.stats:
@@ -44,17 +43,20 @@ class MobileUnit(cursor.MapMover):
 
     def update_stats(self):
         current_stat = 0
+        self.stats = [self.moments]
         for stat in self.stat_card:
-            stat.text = "{0}".format(self.stats[current_stat])
+            try:
+                stat.text = "{0}".format(self.stats[current_stat])
+            except IndexError:
+                print "You tried to use an index of {0}, which was out of range".format(current_stat)
             current_stat += 1
             
     def clear_stats(self):
+        pass
+        
+    def refresh_stats(self):
         for stat in self.stat_card:
-            self.stat_card.remove(stat)
-            stat.delete()
-            stat.die()
-        self.stat_card = []
-        self.stats = []
+            stat.text = "{0}".format(1)
         
     def die(self):
         pass

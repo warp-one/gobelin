@@ -24,11 +24,20 @@ class Selector(pyglet.sprite.Sprite):
                 if unit_index == len(self.units):
                     unit_index = 0
                 self.selected_unit = self.units[unit_index]
-                self.selected_unit.display_stats()
+                self.selected_unit.update_stats()
             self.visible = True
         else:
             self.selected_unit = None
         self.update()
+        for unit in self.units:
+            if unit != self.selected_unit:
+                for stat in unit.stat_card:
+                    stat.x = 0
+                    stat.y = 0
+            else:
+                for stat in unit.stat_card:
+                    stat.x = stat.def_x
+                    stat.y = stat.def_y
         
     def update(self):
         if self.visible:
@@ -149,16 +158,14 @@ class PushableBox(MapMover):
 
     # tries to get pushed from some direction and lets you know if it succeeds
     def get_pushed(self, pusher_r, pusher_c, pusher):
-        delta_c = self.map_x - pusher_c
-        delta_r = self.map_y - pusher_r
+        delta_x = self.map_x - pusher_c
+        delta_y = self.map_y - pusher_r
         if pusher.strong:
-            if delta_c and self.is_legal_move(self.map_x + delta_c, self.map_y):
-                self.selector.x += self.step * (delta_c)
-                self.map_x += delta_c
-                return True
-            if delta_r and self.is_legal_move(self.map_x, self.map_y + delta_r):
-                self.selector.y += self.step * (delta_r)
-                self.map_y += delta_r
+            if self.is_legal_move(self.map_x + delta_x, self.map_y + delta_y):
+                self.selector.x += self.step * (delta_x)
+                self.selector.y += self.step * (delta_y)
+                self.map_x += delta_x
+                self.map_y += delta_y
                 return True
         return False
         

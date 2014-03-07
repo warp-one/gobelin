@@ -34,8 +34,10 @@ class LevelAdministrator(screen.Screen):
             self.enemy_turn()
             for unit in self.current_map.goblin_team:
                 unit.moments = unit.speed
+                unit.update_stats()
             for unit in self.current_map.magic_team:
                 unit.moments = unit.speed
+                unit.update_stats()
         if symbol == key.F1:
             self.game.window.pop_handlers()
             self.game.window.push_handlers(self.current_map.map_editor[0])
@@ -78,6 +80,8 @@ class LevelAdministrator(screen.Screen):
             unit.display_stats()
             self.current_map.light_sources.append(unit)
             unit.fog.visible = False
+            for stat in unit.stat_card:
+                stat.def_x, stat.def_y = 700, 300
             
     def spawn_goblin_team(self):
         self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10, resources.goblin, self.foreground)
@@ -88,11 +92,14 @@ class LevelAdministrator(screen.Screen):
         self.test_enemy_2 = mob.GoblinUnit(self.current_map, 6, 1, resources.goblin, self.foreground)
         self.test_enemy_2.selector.batch = self.batch
         self.test_enemy_2.fog.batch = self.batch
+        self.test_enemy_2.speed = 45
         self.current_map.goblin_team.append(self.test_enemy_2)
         
         for unit in self.current_map.goblin_team:
             unit.wx, unit.wy = 700, 300
             unit.display_stats()
+            for stat in unit.stat_card:
+                stat.def_x, stat.def_y = 700, 200
 
     def enemy_turn(self):
         for unit in self.current_map.goblin_team:
@@ -112,6 +119,7 @@ class LevelAdministrator(screen.Screen):
         self.friend_selector.map = self.current_map
         self.friend_selector.units = self.current_map.magic_team
         self.friend_selector.select(self.selected_unit)
+#        self.friend_selector.selected_unit.display_stats()
 
         self.foe_selector = cursor.Selector(img = resources.rslect, 
                                         x = 0, 
