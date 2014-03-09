@@ -1,3 +1,5 @@
+from random import choice
+
 import pyglet
 
 pyglet.resource.path = ["../resources"]
@@ -70,16 +72,37 @@ block = pyglet.resource.image("block.png")
 # unit tiles
 cursor = pyglet.resource.image("cursor.png")
 magic_w = pyglet.resource.image("magic-w.png")
+hemry = pyglet.resource.image("hemry.png")
 goblin = pyglet.resource.image("goblin.png")
 shadow = pyglet.resource.image("shadow.png")
+sshadw = pyglet.resource.image("small_shdw.png")
+flame = pyglet.resource.image("flame.png")
 
-# mover tiles
+## MOVER TILES | image grids
+gombroon_pottery = pyglet.image.load("../resources/gombroon.png")
+box_tiles = pyglet.image.ImageGrid(gombroon_pottery, 2, 2)
+# box
+box_1 = box_tiles[0]
+box_2 = box_tiles[1]
+box_3 = box_tiles[2]
+box_4 = box_tiles[3]
+box_lookup = {'dinos':    box_1,
+              'ewer':     box_2,
+              'psykter':  box_3,
+              'lekythos': box_4}
+def random_box():
+    return choice(box_lookup.values())
+# torch | static
+torch = pyglet.resource.image("torch.png")
+    
+# other
 default = pyglet.resource.image("default.png")
-box = pyglet.resource.image("box.png")
+empty = pyglet.resource.image("empty.png")
 
 # cursor tiles
 target = pyglet.resource.image("target.png")
 select = pyglet.resource.image("select.png")
 rslect = pyglet.resource.image("rslect.png")
+bslect = pyglet.resource.image("bslect.png")
 
 # FONTS

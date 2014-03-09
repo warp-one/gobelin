@@ -4,46 +4,58 @@ from random import choice, randint
 import pyglet
 from pyglet.window import key
 
-import cursor, resources, map, stat_card
+import map_mover, cursor, resources, terrain, stat_card, guts, grid
 
-class MobileUnit(cursor.MapMover):
+class MobileUnit(map_mover.MapMover):
     def __init__(self, *args, **kwargs):
         super(MobileUnit, self).__init__(*args, **kwargs)
         
-        self.speed = 75
+        self.name = ""
+        self.body = guts.Body()
+        self.speed = self.body.aptitudes['speed']
         self.moments = self.speed
-        self.body = 100
         self.wx = 0
         self.wy = 0
+        self.stats = [self.name].extend([self.body.get_status(), self.moments])
         self.stat_card = []
+        self.health_card = []
+        self.selector.visible = True
         
     def on_key_press(self, symbol, modifiers):
         if self.moments > 0:
             if super(MobileUnit, self).on_key_press(symbol, modifiers):
                 self.moments -= 15
                 if self.stats:
-                    self.stats[0] -= 15
+                    self.stats[2] -= 15
                 return True
             else:
                 return False
-            
+
+    def set_name(self):
+        self.name = choice(['not a goblin'])
+                
     def display_stats(self):
-        self.stats = [self.moments]
-        self.stat_card = []
         a_number = 0
+        self.stats = [self.name, self.body.get_status(), self.moments]
+        self.stats.extend(self.body.body.values())
         for stat in self.stats:
-            self.stat_card.append(stat_card.StatLabel(
+            new_stat_x = self.wx
+            new_stat_y = self.wy - (a_number * 20)
+            new_stat_label = stat_card.StatLabel(
                                     "{0}".format(stat),
-                                    x = self.wx,
-                                    y = self.wy - a_number * 20,
-                                    batch = self.map.level.batch
-                                    ))
-            self.stat_card[-1].unit = self
+                                    x = new_stat_x,
+                                    y = new_stat_y,
+                                    batch = self.game_map.level.batch
+                                    )
+            new_stat_label.def_x, new_stat_label.def_y = new_stat_x, new_stat_y
+            new_stat_label.unit = self
+            self.stat_card.append(new_stat_label)
             a_number += 1
 
     def update_stats(self):
         current_stat = 0
-        self.stats = [self.moments]
+        self.stats = [self.name, self.body.get_status(), self.moments]
+        self.stats.extend(self.body.body.values())
         for stat in self.stat_card:
             try:
                 stat.text = "{0}".format(self.stats[current_stat])
@@ -54,10 +66,6 @@ class MobileUnit(cursor.MapMover):
     def clear_stats(self):
         pass
         
-    def refresh_stats(self):
-        for stat in self.stat_card:
-            stat.text = "{0}".format(1)
-        
     def die(self):
         pass
         
@@ -65,16 +73,17 @@ class GoblinUnit(MobileUnit):
     def __init__(self, *args, **kwargs):
         super(GoblinUnit, self).__init__(*args, **kwargs)
         self.strong = False
+        self.very_strong = False
         self.speed = 30
         self.moments = self.speed
+        self.fog.image = resources.shadow
         
     def take_turn(self):
         victim = self.find_nearest_foe()
         while self.moments > 0:
-            for coordinate in map.target_cross(self):
+            for coordinate in grid.target_cross(self):
                 if (coordinate[0], coordinate[1]) == (victim.map_x, victim.map_y):
                     self.attack(victim)
-                    print "got 'im, boss"
             self.move_toward_foe(victim)
             
         
@@ -82,7 +91,7 @@ class GoblinUnit(MobileUnit):
         foes = []
         enemy_range = 10000
         target = None
-        for unit in self.map.magic_team:
+        for unit in self.game_map.magic_team:
             distance = sqrt(
                         (self.map_x - unit.map_x) ** 2 +
                         (self.map_y - unit.map_y) ** 2
@@ -116,9 +125,13 @@ class GoblinUnit(MobileUnit):
         self.moments -= duration
         
     def attack(self, target):
-        target.body -= 13 + randint(1,3)
-        if target.body <= 0.0:
-            target.die()
+        does_hit = target.body.receive_light_melee(self.body)
+        if does_hit and isinstance(does_hit, (int, long)):
+            pass
+        elif does_hit:
+            print "I hit your {0}!".format(does_hit)
+        else:
+            print "I missed."
         self.moments -= 20
         
                 
@@ -126,8 +139,10 @@ class MagicWoman(MobileUnit):
     def __init__(self, *args, **kwargs):
         super(MagicWoman, self).__init__(*args, **kwargs)
         self.strong = False
+        self.very_strong = False
         self.ready = False
         self.speed = 100000
+        self.name = choice(['Llynze', 'Mah Lissa', 'E-Fay'])
         
     def on_key_press(self, symbol, modifiers):
         if not self.ready:
@@ -140,12 +155,12 @@ class MagicWoman(MobileUnit):
             
     def prepare_spell(self):
         self.targets = [] 
-        for coordinate in map.target_cross(self):
+        for coordinate in grid.target_cross(self):
             self.targets.append((coordinate, pyglet.sprite.Sprite(
                        img = resources.target,
-                       x = coordinate[1] * self.map.step + self.map.x,
-                       y = (coordinate[0] + 1) * self.map.step + self.map.y,
-                       batch = self.map.batch
+                       x = coordinate[1] * self.game_map.step + self.game_map.x,
+                       y = (coordinate[0] + 1) * self.game_map.step + self.game_map.y,
+                       batch = self.game_map.batch
                        ) ))
         self.ready = True
 
@@ -157,7 +172,9 @@ class MyHim(MobileUnit):
     def __init__(self, *args, **kwargs):
         super(MyHim, self).__init__(*args, **kwargs)
         self.strong = True
+        self.very_strong = False
         self.speed = 75000
+        self.name = 'him'
         
     def on_key_press(self, symbol, modifiers):
         super(MyHim, self).on_key_press(symbol, modifiers)

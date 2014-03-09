@@ -28,8 +28,7 @@ def _target_cross(unit):
     return result
     
 def target_cross(unit):
-    cardinal_tiles = _target_cross(unit)
-    return [cardinal_tiles[x] for x in cardinal_tiles]
+    return _target_cross(unit).values()
 
 def adj_tile_type(cross, type, all_tiles):
     num = 0
@@ -146,4 +145,23 @@ class Terrain(object):
                         pit_img = pit_img | 0b0001
             self.selector.image = resources.bmpt_lookup[pit_img]
                 
-                
+    def fully_lit(self):
+        self.selector.visible = True
+        self.fog.visible = False
+        self.dark.visible = False
+        
+    def in_shadow(self):
+        self.selector.visible = False
+        self.fog.visible = True
+        self.dark.visible = False
+    
+    def in_darkness(self):
+        self.selector.visible = False
+        self.fog.visible = False
+        self.dark.visible = True
+        
+    def hide(self):
+        self.selector.visible = False
+        self.fog.visible = False
+        self.dark.visible = False
+        

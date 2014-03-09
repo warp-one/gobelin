@@ -1,7 +1,7 @@
 from pyglet.window import key
 import pyglet
 
-import screen, test_map, cursor, resources, mob
+import screen, test_map, cursor, resources, mob, map_editor
 
 class LevelAdministrator(screen.Screen):
     def __init__(self, game):
@@ -55,16 +55,15 @@ class LevelAdministrator(screen.Screen):
         self.spawn_magic_team()
         self.spawn_goblin_team()
         
-        self.current_map.place_objects()
-        for b in self.current_map.boxes:
-            b.selector.batch = self.batch
+        self.current_map.place_boxes([(1, 1), (2, 2), (3, 3)])
+        self.current_map.place_torches([(3, 1), (5, 2), (7, 3)])
         self.spawn_map_editor()
         self.create_cursors()
         
         self.current_map.redraw()
 
     def spawn_magic_team(self):
-        self.test_mover_1 = mob.MyHim(self.current_map, 2, 8, group = self.foreground)
+        self.test_mover_1 = mob.MyHim(self.current_map, 2, 8, resources.hemry, group = self.foreground)
         self.test_mover_1.selector.batch = self.batch
         self.test_mover_1.fog.batch = self.batch
         self.current_map.magic_team.append(self.test_mover_1)
@@ -80,8 +79,6 @@ class LevelAdministrator(screen.Screen):
             unit.display_stats()
             self.current_map.light_sources.append(unit)
             unit.fog.visible = False
-            for stat in unit.stat_card:
-                stat.def_x, stat.def_y = 700, 300
             
     def spawn_goblin_team(self):
         self.test_enemy_1 = mob.GoblinUnit(self.current_map, 10, 10, resources.goblin, self.foreground)
@@ -97,16 +94,17 @@ class LevelAdministrator(screen.Screen):
         
         for unit in self.current_map.goblin_team:
             unit.wx, unit.wy = 700, 300
+            unit.set_name()
             unit.display_stats()
             for stat in unit.stat_card:
-                stat.def_x, stat.def_y = 700, 200
+                stat.def_y -= 100
 
     def enemy_turn(self):
         for unit in self.current_map.goblin_team:
             unit.take_turn()
             
     def spawn_map_editor(self):
-        self.map_editor = cursor.MapEditor(self.current_map, 1, 4, resources.cursor)
+        self.map_editor = map_editor.MapEditor(self.current_map, 1, 4, resources.cursor)
         self.map_editor.selector.batch = self.batch
         self.current_map.map_editor.append(self.map_editor)
             
@@ -119,14 +117,13 @@ class LevelAdministrator(screen.Screen):
         self.friend_selector.map = self.current_map
         self.friend_selector.units = self.current_map.magic_team
         self.friend_selector.select(self.selected_unit)
-#        self.friend_selector.selected_unit.display_stats()
 
         self.foe_selector = cursor.Selector(img = resources.rslect, 
                                         x = 0, 
                                         y = 0,
                                         batch = self.batch,
                                         group = self.midground)
-        self.foe_selector.map = self.current_map
+        self.foe_selector.game_map = self.current_map
         self.foe_selector.units = self.current_map.goblin_team
         self.foe_selector.select(self.selected_enemy)
         
