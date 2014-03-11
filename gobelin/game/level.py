@@ -6,6 +6,7 @@ import screen, test_map, cursor, resources, mob, map_editor
 class LevelAdministrator(screen.Screen):
     def __init__(self, game):
         self.game = game
+        self.frontground = pyglet.graphics.OrderedGroup(3)
         self.foreground = pyglet.graphics.OrderedGroup(2)
         self.midground = pyglet.graphics.OrderedGroup(1)
         self.background = pyglet.graphics.OrderedGroup(0)
@@ -76,6 +77,7 @@ class LevelAdministrator(screen.Screen):
         
         for unit in self.current_map.magic_team:
             unit.wx, unit.wy = 700, 500
+            unit.portrait.def_x, unit.portrait.def_y = unit.wx, unit.wy
             unit.display_stats()
             self.current_map.light_sources.append(unit)
             unit.fog.visible = False
@@ -94,10 +96,12 @@ class LevelAdministrator(screen.Screen):
         
         for unit in self.current_map.goblin_team:
             unit.wx, unit.wy = 700, 300
+            unit.portrait.def_x, unit.portrait.def_y = unit.wx, unit.wy
             unit.set_name()
             unit.display_stats()
             for stat in unit.stat_card:
                 stat.def_y -= 100
+            unit.portrait.def_y -= 100
 
     def enemy_turn(self):
         for unit in self.current_map.goblin_team:
@@ -128,6 +132,7 @@ class LevelAdministrator(screen.Screen):
         self.foe_selector.select(self.selected_enemy)
         
         self.selectors.extend([self.friend_selector, self.foe_selector])
+        
 
     def on_draw(self):
         self.game.window.clear()

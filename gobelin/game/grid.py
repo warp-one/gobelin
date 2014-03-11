@@ -2,7 +2,7 @@ from math import sqrt
 
 import pyglet
 
-import resources
+import resources, portrait
 
 def _distance(c1, c2):
     return sqrt((c1[0] - c2[0])**2 +
@@ -90,27 +90,31 @@ class Quad(object):
         image_x = self.game_map.x + self.selector.width * self.map_x
         image_y = self.game_map.y + self.selector.height * (self.map_y + 1)
         self.images = [self.selector, self.fog, self.dark]
+        self.verticals = None
         for i in self.images:
             i.x, i.y = image_x, image_y
             i.visible = False
         self.identity = 0
+        self.inventory = []
 
     def fully_lit(self):
-        self.selector.visible = True
-        self.fog.visible = False
-        self.dark.visible = False
+        self._adjust_visibility(True, False, False, True)
         
     def in_shadow(self):
-        self.selector.visible = False
-        self.fog.visible = True
-        self.dark.visible = False
+        self._adjust_visibility(False, True, False, False)
     
     def in_darkness(self):
-        self.selector.visible = False
-        self.fog.visible = False
-        self.dark.visible = True
+        self._adjust_visibility(False, False, True, False)
         
     def hide(self):
-        self.selector.visible = False
-        self.fog.visible = False
-        self.dark.visible = False
+        self._adjust_visibility(False, False, False, False)
+
+    def _adjust_visibility(self, sv, fv, dv, vv):
+        self.selector.visible = sv
+        self.fog.visible = fv
+        self.dark.visible = dv
+        if self.verticals:
+            self.verticals.visible = vv
+        
+    def create_portrait(self, *args, **kwargs):
+        pass

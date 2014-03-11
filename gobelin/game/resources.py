@@ -20,6 +20,12 @@ def uncenter_image(image):
 # backgrounds
 title = pyglet.resource.image("title.png")
 
+# art
+unitp00 = pyglet.resource.image("unitp00.png") # a caryatid's face
+unitp01 = pyglet.resource.image("unitp01.png") # a cycladic figurine's portrait
+unitp10 = pyglet.resource.image("unitp10.png") # a mouth and jaw from bosch
+unitp11 = pyglet.resource.image("unitp11.png") # and one of his craven birds
+
 ## STATIC TILES | image grids
 bottomless_pit = pyglet.image.load("../resources/-bottomless-pit.png")
 bmpt_tiles = pyglet.image.ImageGrid(bottomless_pit, 4, 4)
@@ -104,5 +110,15 @@ target = pyglet.resource.image("target.png")
 select = pyglet.resource.image("select.png")
 rslect = pyglet.resource.image("rslect.png")
 bslect = pyglet.resource.image("bslect.png")
+
+### DOODADS
+## SUPERMARKET | image grids
+supermarket = pyglet.image.load("../resources/-supermarket.png")
+spmkt_tiles = pyglet.image.ImageGrid(supermarket, 8, 8)
+supermarket_fog = pyglet.image.load("../resources/-supermarket-fog.png")
+smfog_tiles = pyglet.image.ImageGrid(supermarket_fog, 8, 8)
+supermarket_sign = pyglet.image.load("../resources/-supermarket-sign.png")
+smsign_tiles = pyglet.image.ImageGrid(supermarket_sign, 8, 8)
+# fog
 
 # FONTS

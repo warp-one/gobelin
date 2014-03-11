@@ -5,11 +5,15 @@ import resources, grid
 terrain_types = {}
 
 class TerrainType(object):
+    def __init__(self):
+        self.pathable_tiles = []
+
     def _retile(self, arg1, arg2):
         return arg1, arg2
 
 class Dirt(TerrainType):
     def __init__(self, terrain_dict):
+        super(Dirt, self).__init__()
         self.image = resources.dirt
         self.f_image = resources.mist
         self.d_image = resources.dark
@@ -20,6 +24,7 @@ class Dirt(TerrainType):
 
 class Wall(TerrainType):
     def __init__(self, terrain_dict):
+        super(Wall, self).__init__()
         self.image = resources.brick
         self.f_image = resources.block
         self.d_image = resources.block
@@ -52,6 +57,7 @@ class Wall(TerrainType):
 
 class Pit(TerrainType):
     def __init__(self, terrain_dict):
+        super(Pit, self).__init__()
         self.image = resources.bmpt_lookup[0b0000]
         self.f_image = resources.mist
         self.d_image = resources.dark
@@ -77,6 +83,7 @@ class Pit(TerrainType):
         
 class Water(TerrainType):
     def __init__(self, terrain_dict):
+        super(Water, self).__init__()
         self.image = resources.water
         self.f_image = resources.mist
         self.d_image = resources.dark
@@ -84,27 +91,59 @@ class Water(TerrainType):
         self.boxable = True
         self.destructible = False
         terrain_dict['water'] = self
+        
+class Doodad(TerrainType):
+    def __init__(self, terrain_dict):
+        super(Doodad, self).__init__()
+        self.image = resources.default
+        self.f_image = resources.default
+        self.d_image = resources.block
+        self.pathable = False
+        self.boxable = False
+        self.destructible = False
+        terrain_dict['doodad'] = self
+        
+class Supermarket(Doodad):
+    def __init__(self, terrain_dict):
+        super(Supermarket, self).__init__({})
+        self.pathable_tiles = [(2,0), (3,0), (4,0), (5,0),
+                               (5,1), (5,2), (5,3), (5,4), 
+                               (5,5), (5,6), (5,7), (6,1), 
+                               (6,2), (6,5), (6,6), (6,7),
+                               (7,0), (7,1), (7,2), (7,3),
+                               (7,4), (7,5), (7,6), (7,7)]
+        terrain_dict['supermarket'] = self
 
-all_terrain = [Dirt, Wall, Pit, Water]        
+all_terrain = [Dirt, Wall, Pit, Water, Supermarket]        
 for _ in all_terrain:
     _(terrain_types)
        
 class Terrain(grid.Quad):
     def __init__(self, game_map, c2pl, tile):
         super(Terrain, self).__init__(game_map, c2pl)
-        
         self.become(tile)
         
     def become(self, tile):
         self.identity = tile
-        attributes = terrain_types[tile]
-        self.selector.image = attributes.image
-        self.fog.image = attributes.f_image
-        self.dark.image = attributes.d_image
-        self.pathable = attributes.pathable
-        self.boxable = attributes.boxable
-        self.destructible = attributes.destructible
+        self.attributes = terrain_types[tile]
+        self.selector.image = self.attributes.image
+        self.fog.image = self.attributes.f_image
+        self.dark.image = self.attributes.d_image
+        self.pathable = self.attributes.pathable
+        self.boxable = self.attributes.boxable
+        self.destructible = self.attributes.destructible
+        self.pathable_tiles = self.attributes.pathable_tiles
         self.repaint()
         
+    def become_doodad(self, tile):
+        self.become(tile)
+        self.verticals = pyglet.sprite.Sprite(
+                                        img = resources.default,
+                                        x = 0,
+                                        y = 0,
+                                        batch = None,
+                                        group = None
+                                        )
+
     def repaint(self):
         terrain_types[self.identity]._retile(self.game_map, self)

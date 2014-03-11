@@ -37,14 +37,17 @@ class Body(object):
     def receive_light_melee(self, assailant):
         for limb in self.body:
             this_limb = self.body[limb]
-            miss = randint(0, len(self.body))
-            if not miss:
-                print "HITTT"
-                self.body[limb] -= assailant.aptitudes['heft'] + randint(1, 2)
-                if this_limb <= 0:
-                    print "You lost a {0}.".format(limb)
-                    this_limb = 0
-                    return self.body.pop(limb)
-                return limb
+            if this_limb > 0:
+                miss = randint(0, len(self.body))
+                if not miss:
+                    print "HITTT"
+                    self.body[limb] -= assailant.aptitudes['heft'] + randint(1, 2)
+                    if this_limb <= 0:
+                        print "You lost a {0}.".format(limb)
+                        this_limb = 0
+                        return self.body.pop(limb)
+                    return limb
+            else:
+                pass
         return False
         

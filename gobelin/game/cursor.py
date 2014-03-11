@@ -35,10 +35,12 @@ class Selector(pyglet.sprite.Sprite):
                 for stat in unit.stat_card:
                     stat.x = 0
                     stat.y = 0
+                unit.hide_portrait()
             else:
                 for stat in unit.stat_card:
                     stat.x = stat.def_x
                     stat.y = stat.def_y
+                unit.show_portrait()
         
     def update(self):
         if self.visible:
