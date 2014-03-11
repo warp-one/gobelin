@@ -25,14 +25,29 @@ class MobileUnit(map_mover.MapMover):
         self.selector.visible = True
         
     def on_key_press(self, symbol, modifiers):
-        if self.moments > 0:
+        if self.lose_time(15):
             if super(MobileUnit, self).on_key_press(symbol, modifiers):
-                self.moments -= 15
                 if self.stats:
                     self.update_stats()
                 return True
             else:
+                if self in self.game_map.magic_team:
+                    self.gain_time(15)
                 return False
+
+    def gain_time(self, duration):
+        if duration + self.moments <= self.speed:
+            self.moments += duration
+        else:
+            self.moments = self.speed
+        return True
+
+    def lose_time(self, duration):
+        if duration <= self.moments:
+            self.moments -= duration
+            return True
+        else:
+            return False
 
     def set_name(self):
         self.name = choice(['not a goblin'])
@@ -115,14 +130,20 @@ class GoblinUnit(MobileUnit):
         self.portrait.visible = False
         
     def take_turn(self):
+        adjacent_to_foe = False
         victim = self.find_nearest_foe()
         while self.moments > 0:
             for coordinate in grid.target_cross(self):
                 if (coordinate[0], coordinate[1]) == (victim.map_x, victim.map_y):
-                    self.attack(victim)
-            self.move_toward_foe(victim)
-            
-        
+                    adjacent_to_foe = True
+            if adjacent_to_foe and self.lose_time(20):
+                self.attack(victim)
+            elif not adjacent_to_foe and self.lose_time(15):
+                self.move_toward_foe(victim)
+            else:
+                return True
+        return False
+
     def find_nearest_foe(self):
         foes = []
         enemy_range = 10000
@@ -144,21 +165,15 @@ class GoblinUnit(MobileUnit):
         r_diff = self.map_y - target.map_y
         if abs(c_diff) >= abs(r_diff):
             if c_diff > 0:
-                if not self.on_key_press(key.LEFT, None):
-                    self.lose_time(15)
+                self.on_key_press(key.LEFT, None):
             else:
-                if not self.on_key_press(key.RIGHT, None):
-                    self.lose_time(15)
+                self.on_key_press(key.RIGHT, None):
         else:
             if r_diff > 0:
-                if not self.on_key_press(key.DOWN, None):
-                    self.lose_time(15)
+                self.on_key_press(key.DOWN, None):
             else:
-                if not self.on_key_press(key.UP, None):
-                    self.lose_time(15)
+                self.on_key_press(key.UP, None):
                 
-    def lose_time(self, duration):
-        self.moments -= duration
         
     def attack(self, target):
         does_hit = target.body.receive_light_melee(self.body)
