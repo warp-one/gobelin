@@ -9,3 +9,8 @@ class StatLabel(pyglet.text.Label):
     def die(self):
         self.batch = None 
         
+    def _show(self):
+        self.x, self.y = self.def_x, self.def_y
+
+    def _hide(self):
+        self.x, self.y = -200, -200

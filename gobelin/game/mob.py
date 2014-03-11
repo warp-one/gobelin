@@ -38,12 +38,12 @@ class MobileUnit(map_mover.MapMover):
         self.name = choice(['not a goblin'])
 
     def display_stats(self):
-        a_number = 1
+        n = 1
         self.stats = [("", self.name), self.body.get_status(), ("time", self.moments)]
         self.stats.extend(self.body.body.items())
         for stat in self.stats:
             new_stat_x = self.wx
-            new_stat_y = self.wy - (a_number * 20)
+            new_stat_y = self.wy - (n * 20)
             label_text = "{0}: {1}".format(stat[0], stat[1])
             new_stat_label = stat_card.StatLabel(
                                     text = label_text,
@@ -54,7 +54,7 @@ class MobileUnit(map_mover.MapMover):
             new_stat_label.def_x, new_stat_label.def_y = new_stat_x, new_stat_y
             new_stat_label.unit = self
             self.stat_card.append(new_stat_label)
-            a_number += 1
+            n += 1
 
     def update_stats(self):
         current_stat = 0
@@ -73,17 +73,29 @@ class MobileUnit(map_mover.MapMover):
     
     def clear_stats(self):
         pass
+
+    def show_info(self):
+        self.show_portrait()
+        self.show_stats()
         
+    def hide_info(self):
+        self.hide_portrait()
+        self.hide_stats()
+
     def hide_portrait(self):
-        self.portrait.x = -400
-        self.portrait.y = -400
-        self.portrait.visibile = False
+        self.portrait._hide()
         
     def show_portrait(self):
-        self.portrait.x = self.portrait.def_x
-        self.portrait.y = self.portrait.def_y
-        self.portrait.visible = True
+        self.portrait._show()
         
+    def hide_stats(self):
+        for s in self.stat_card:
+            s._hide()
+        
+    def show_stats(self):
+        for s in self.stat_card:
+            s._show()
+
     def die(self):
         pass
         

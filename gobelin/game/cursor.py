@@ -12,13 +12,11 @@ class Selector(pyglet.sprite.Sprite):
         self.identity = 0
         
     def select(self, unit_index):
-        if self.selected_unit:
-            self.selected_unit.clear_stats()
-        self.visible_units = 0
+        n_visible_units = 0
         for unit in self.units:
             if unit.selector.visible:
-                self.visible_units += 1
-        if self.visible_units:
+                n_visible_units += 1
+        if n_visible_units:
             self.selected_unit = self.units[unit_index]
             while not self.selected_unit.selector.visible:
                 unit_index += 1
@@ -30,18 +28,13 @@ class Selector(pyglet.sprite.Sprite):
         else:
             self.selected_unit = None
         self.update()
+        # all related chores when switching between units below this line
         for unit in self.units:
             if unit != self.selected_unit:
-                for stat in unit.stat_card:
-                    stat.x = 0
-                    stat.y = 0
-                unit.hide_portrait()
+                unit.hide_info()
             else:
-                for stat in unit.stat_card:
-                    stat.x = stat.def_x
-                    stat.y = stat.def_y
-                unit.show_portrait()
-        
+                unit.show_info()        
+
     def update(self):
         if self.visible:
             if self.selected_unit:
@@ -112,16 +105,10 @@ class Torch(PushableBox):
         self.brightness = 3
     
     def get_pushed(self, pusher_r, pusher_c, pusher):
-        delta_x = self.map_x - pusher_c
-        delta_y = self.map_y - pusher_r
         if pusher.very_strong:
-            if self.is_legal_move(self.map_x + delta_x, self.map_y + delta_y):
-                self.selector.x += self.step * (delta_x)
-                self.selector.y += self.step * (delta_y)
-                self.map_x += delta_x
-                self.map_y += delta_y
-                return True
-        return False        
+            return super(Torch, self).get_pushed(pusher_r, pusher_c, pusher)
+        else:
+            return False        
 
     def die(self):
         self.selector.batch = None
